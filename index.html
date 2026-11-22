@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corte de Tênis</title>
+<meta name="description" content="Corta o tempo morto do vídeo do jogo e mostra a velocidade de cada batida. Tudo no seu aparelho, sem upload.">
+<meta name="theme-color" content="#0f1720">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='%23c8e43a'/><path d='M14 30 Q50 50 14 72 M86 30 Q50 50 86 72' stroke='white' stroke-width='6' fill='none'/></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <h1>Corte de Tênis</h1>
+    <p class="lead">Escolha o vídeo do jogo. O app tira o tempo morto, deixa só os rallies e mostra a velocidade de cada batida no canto superior direito.</p>
+    <p class="note">O vídeo é processado no seu aparelho. Nada é enviado para a internet, então não existe limite de tamanho.</p>
+  </header>
+
+  <section class="card" id="pick">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="video/*,.mov,.mp4,.m4v">
+      <span class="drop-title">Escolher vídeo</span>
+      <span class="drop-sub" id="fileLabel">ou arraste o arquivo para cá (MOV ou MP4)</span>
+    </label>
+
+    <div class="grid">
+      <label>Tamanho do vídeo final
+        <select id="resolution">
+          <option value="540">540p (mais leve)</option>
+          <option value="720" selected>720p (recomendado)</option>
+          <option value="1080">1080p (original)</option>
+        </select>
+      </label>
+      <label>Qualidade
+        <select id="quality">
+          <option value="0.05">Leve</option>
+          <option value="0.075" selected>Equilibrada</option>
+          <option value="0.11">Alta</option>
+        </select>
+      </label>
+      <label>Velocidade mostrada
+        <select id="speedMode">
+          <option value="avg" selected>Média do trajeto (medida)</option>
+          <option value="exit">Saída da raquete (estimativa)</option>
+        </select>
+      </label>
+      <label>Sensibilidade às batidas
+        <input type="range" id="sensitivity" min="0" max="1" step="0.05" value="0.5">
+      </label>
+    </div>
+
+    <details class="more">
+      <summary>Mais ajustes</summary>
+      <div class="grid">
+        <label>Nome de quem está perto da câmera
+          <input type="text" id="nearName" value="Perto da câmera" maxlength="24">
+        </label>
+        <label>Nome de quem está no fundo
+          <input type="text" id="farName" value="Fundo" maxlength="24">
+        </label>
+        <label>Distância entre os jogadores (m)
+          <input type="number" id="distance" value="25" min="10" max="40" step="0.5">
+        </label>
+        <label>Pausa que encerra o rally (s)
+          <input type="number" id="maxGap" value="3" min="1.5" max="8" step="0.1">
+        </label>
+        <label>Margem antes do rally (s)
+          <input type="number" id="pre" value="1" min="0" max="5" step="0.1">
+        </label>
+        <label>Margem depois do rally (s)
+          <input type="number" id="post" value="1.5" min="0" max="6" step="0.1">
+        </label>
+        <label>Batidas mínimas por rally
+          <input type="number" id="minHits" value="2" min="1" max="6" step="1">
+        </label>
+        <label class="check"><input type="checkbox" id="keep60"> Manter 60 fps (mais lento e mais pesado)</label>
+      </div>
+    </details>
+
+    <button id="go" class="primary" disabled>Cortar vídeo</button>
+    <p class="hint" id="estimate"></p>
+  </section>
+
+  <section class="card hidden" id="work">
+    <div class="stage" id="stage">Preparando…</div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="meta"><span id="elapsed"></span><span id="eta"></span></div>
+    <div id="analysisBox" class="hidden">
+      <div class="stats" id="stats"></div>
+    </div>
+    <button id="cancel" class="ghost">Cancelar</button>
+  </section>
+
+  <section class="card hidden" id="done">
+    <h2>Pronto</h2>
+    <p id="doneText"></p>
+    <video id="preview" controls playsinline></video>
+    <div class="actions">
+      <a id="download" class="primary" download>Baixar vídeo</a>
+      <button id="share" class="ghost hidden">Compartilhar</button>
+      <button id="csv" class="ghost">Baixar planilha das batidas</button>
+      <button id="again" class="ghost">Cortar outro vídeo</button>
+    </div>
+    <div class="stats" id="finalStats"></div>
+    <details class="more">
+      <summary>Lista de batidas</summary>
+      <div class="table-wrap"><table id="shotTable"><thead><tr><th>Tempo no vídeo original</th><th>Jogador</th><th>km/h</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
+  <section class="card error hidden" id="err"></section>
+
+  <footer class="foot">
+    <p><strong>Como a velocidade é calculada:</strong> o app ouve o "toc" de cada batida e mede o tempo que a bola leva de um jogador ao outro. Velocidade = distância ÷ tempo, descontando o atraso do som do jogador do fundo. O número é a velocidade média do trajeto (com o quique); a saída da raquete é mais alta, por isso existe a opção de estimativa. A margem de erro fica em torno de 10 a 15%.</p>
+    <p><strong>Para o melhor resultado:</strong> câmera fixa atrás da linha de base, sem música por perto. Funciona melhor no Chrome ou Edge no computador. No iPhone, use o Safari atualizado.</p>
+  </footer>
+</main>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
